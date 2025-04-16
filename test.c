@@ -186,9 +186,10 @@ static parsed_cmd_t parse_line(const char *line)
 static void display_rule_list(void)
 {
     int i = 0;
-    struct rule node *curr = rule_list_head;
+    struct rule_node *curr = rule_list_head;
     while (curr)
     {
+        char *rule_buffer[1024];
         struct rule_node *tmp = curr->next;
         snprintf(rule_buffer, BUF_SIZE,
             "PATH: %s\nRULE: %s\nUID: %s\nUSER: %s\nGID: %s\nPID: %s\nRIGHT: %s\nALIAS: %s\n",
@@ -200,21 +201,27 @@ static void display_rule_list(void)
     }
 }
 
+static void free_cmd(parsed_cmd_t *cmd)
+{
+    kfree(cmd->rule.path);
+    kfree(cmd->rule.rule);
+    kfree(cmd->rule.uid);
+    kfree(cmd->rule.user);
+    kfree(cmd->rule.gid);
+    kfree(cmd->rule.pid);
+    kfree(cmd->rule.right);
+    kfree(cmd->rule.alias);
+    kfree(cmd->arg1);
+    kfree(cmd->arg2);
+}
+
 static void free_rule_list(void)
 {
     struct rule_node *curr = rule_list_head;
     while (curr)
     {
         struct rule_node *tmp = curr->next;
-        kfree(curr->rule.path);
-        kfree(curr->rule.rule);
-        kfree(curr->rule.uid);
-        kfree(curr->rule.user);
-        kfree(curr->rule.gid);
-        kfree(curr->rule.pid);
-        kfree(curr->rule.right);
-        kfree(curr->rule.alias);
-        kfree(curr);
+        free_cmd(curr);
         curr = tmp;
     }
 }
