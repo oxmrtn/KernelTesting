@@ -5,7 +5,8 @@
 #include <linux/uaccess.h>
 #include <linux/slab.h>
 
-#define PROC_NAME "customcmd"
+#define PROC_DIR_NAME "l3SM"
+#define PROC_FILE_NAME "rules"
 #define BUF_SIZE 512
 
 MODULE_LICENSE("GPL");
@@ -148,6 +149,9 @@ static void free_cmd(parsed_cmd_t *cmd)
     kfree(cmd->arg2);
 }
 
+// Buffer pour stocker les règles
+static char rule_buffer[BUF_SIZE];
+
 static ssize_t proc_write(struct file *file, const char __user *ubuf, size_t count, loff_t *ppos)
 {
     char buf[BUF_SIZE];
@@ -165,37 +169,66 @@ static ssize_t proc_write(struct file *file, const char __user *ubuf, size_t cou
 
     printk(KERN_INFO "[Parser] Command type: %d\n", cmd.type);
     if (cmd.type == CMD_ADD || cmd.type == CMD_REMOVE) {
-        printk(KERN_INFO "  PATH: %s\n", cmd.rule.path);
-        printk(KERN_INFO "  RULE: %s\n", cmd.rule.rule);
-        printk(KERN_INFO "  UID: %s\n", cmd.rule.uid);
-        printk(KERN_INFO "  USER: %s\n", cmd.rule.user);
-        printk(KERN_INFO "  GID: %s\n", cmd.rule.gid);
-        printk(KERN_INFO "  PID: %s\n", cmd.rule.pid);
-        printk(KERN_INFO "  RIGHT: %s\n", cmd.rule.right);
-        printk(KERN_INFO "  ALIAS: %s\n", cmd.rule.alias);
+        snprintf(rule_buffer, BUF_SIZE,
+                 "PATH: %s\nRULE: %s\nUID: %s\nUSER: %s\nGID: %s\nPID: %s\nRIGHT: %s\nALIAS: %s\n",
+                 cmd.rule.path, cmd.rule.rule, cmd.rule.uid, cmd.rule.user,
+                 cmd.rule.gid, cmd.rule.pid, cmd.rule.right, cmd.rule.alias);
+        printk(KERN_INFO "  %s", rule_buffer);
     } else if (cmd.type == CMD_SWITCH) {
-        printk(KERN_INFO "  SWITCH: %s <-> %s\n", cmd.arg1, cmd.arg2);
+        snprintf(rule_buffer, BUF_SIZE, "SWITCH: %s <-> %s\n", cmd.arg1, cmd.arg2);
+        printk(KERN_INFO "  %s", rule_buffer);
     }
 
     free_cmd(&cmd);
     return count;
 }
 
+static ssize_t proc_read(struct file *file, char __user *ubuf, size_t count, loff_t *ppos)
+{
+    size_t len = strlen(rule_buffer);
+
+    if (*ppos > 0 || count < len)
+        return 0;
+
+    if (copy_to_user(ubuf, rule_buffer, len))
+        return -EFAULT;
+
+    *ppos = len;
+    return len;
+}
+
 static struct proc_ops proc_file_ops = {
     .proc_write = proc_write,
+    .proc_read = proc_read,
 };
 
 static int __init rule_parser_init(void)
 {
-    proc_create(PROC_NAME, 0666, NULL, &proc_file_ops);
-    printk(KERN_INFO "Rule Parser module loaded.\n");
+    struct proc_dir_entry *dir;
+
+    // Créer le répertoire /proc/l3SM
+    dir = proc_mkdir(PROC_DIR_NAME, NULL);
+    if (!dir) {
+        printk(KERN_ERR "Failed to create /proc/l3SM directory\n");
+        return -ENOMEM;
+    }
+
+    // Créer le fichier /proc/l3SM/rules
+    if (!proc_create(PROC_FILE_NAME, 0666, dir, &proc_file_ops)) {
+        remove_proc_entry(PROC_DIR_NAME, NULL);
+        printk(KERN_ERR "Failed to create /proc/l3SM/rules file\n");
+        return -ENOMEM;
+    }
+
+    printk(KERN_INFO "Rule Parser module loaded and /proc/l3SM/rules created.\n");
     return 0;
 }
 
 static void __exit rule_parser_exit(void)
 {
-    remove_proc_entry(PROC_NAME, NULL);
-    printk(KERN_INFO "Rule Parser module unloaded.\n");
+    remove_proc_entry(PROC_FILE_NAME, NULL);
+    remove_proc_entry(PROC_DIR_NAME, NULL);
+    printk(KERN_INFO "Rule Parser module unloaded and /proc/l3SM removed.\n");
 }
 
 module_init(rule_parser_init);
