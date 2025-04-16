@@ -83,27 +83,27 @@ static void add_rule_to_list(rule_t *new_rule)
     rule_list_head = node;
 }
 
-static void display_all_rules(void)
-{
-    struct rule_node *curr = rule_list_head;
-    char *p = rule_buffer;
-    int remaining = BUF_SIZE;
+// static void display_all_rules(void)
+// {
+//     struct rule_node *curr = rule_list_head;
+//     char *p = rule_buffer;
+//     int remaining = BUF_SIZE;
 
-    p[0] = '\0';
+//     p[0] = '\0';
 
-    while (curr && remaining > 0) {
-        int written = snprintf(p, remaining,
-            "PATH: %s\nRULE: %s\nUID: %s\nUSER: %s\nGID: %s\nPID: %s\nRIGHT: %s\nALIAS: %s\n\n",
-            curr->rule.path ?: "-", curr->rule.rule ?: "-", curr->rule.uid ?: "-",
-            curr->rule.user ?: "-", curr->rule.gid ?: "-", curr->rule.pid ?: "-",
-            curr->rule.right ?: "-", curr->rule.alias ?: "-");
-        if (written < 0 || written >= remaining)
-            break;
-        p += written;
-        remaining -= written;
-        curr = curr->next;
-    }
-}
+//     while (curr && remaining > 0) {
+//         int written = snprintf(p, remaining,
+//             "PATH: %s\nRULE: %s\nUID: %s\nUSER: %s\nGID: %s\nPID: %s\nRIGHT: %s\nALIAS: %s\n\n",
+//             curr->rule.path ?: "-", curr->rule.rule ?: "-", curr->rule.uid ?: "-",
+//             curr->rule.user ?: "-", curr->rule.gid ?: "-", curr->rule.pid ?: "-",
+//             curr->rule.right ?: "-", curr->rule.alias ?: "-");
+//         if (written < 0 || written >= remaining)
+//             break;
+//         p += written;
+//         remaining -= written;
+//         curr = curr->next;
+//     }
+// }
 
 
 static cmd_type_t get_cmd_type(const char *line)
