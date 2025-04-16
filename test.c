@@ -189,12 +189,12 @@ static void display_rule_list(void)
     struct rule_node *curr = rule_list_head;
     while (curr)
     {
-        char *rule_buffer[1024];
+        char rule_buffer[1024];
         struct rule_node *tmp = curr->next;
         snprintf(rule_buffer, BUF_SIZE,
             "PATH: %s\nRULE: %s\nUID: %s\nUSER: %s\nGID: %s\nPID: %s\nRIGHT: %s\nALIAS: %s\n",
-            curr.rule.path, curr.rule.rule, curr.rule.uid, curr.rule.user,
-            curr.rule.gid, curr.rule.pid, curr.rule.right, curr.rule.alias);
+            curr->rule.path, curr->rule.rule, curr->rule.uid, curr->rule.user,
+            curr->rule.gid, curr->rule.pid, curr->rule.right, curr->rule.alias);
         printk(KERN_INFO "%d:   %s\n", i, rule_buffer);
         i++;
         curr = tmp;
@@ -221,7 +221,7 @@ static void free_rule_list(void)
     while (curr)
     {
         struct rule_node *tmp = curr->next;
-        free_cmd(curr);
+        free_cmd(curr->rule);
         curr = tmp;
     }
 }
