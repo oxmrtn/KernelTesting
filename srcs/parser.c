@@ -43,8 +43,7 @@ void parse_arguments(parsed_cmd_t *cmd, const char *args)
     if (!copy)
         return;
     p = copy;
-    printk(KERN_INFO "IN PARSE_ARGS \n");
-    while ((token = strsep(&p, ";")) != NULL)
+    while ((token = strsep(&p, ",")) != NULL)
     {
         while (*token == ' ')
             token++;
@@ -74,8 +73,8 @@ parsed_cmd_t parse_line(const char *line)
 
     parsed_cmd_t cmd = {0};
     cmd.type = get_cmd_type(line);
-    start = strchr(line, '(');
-    end = strrchr(line, ')');
+    start = strchr(line, '{');
+    end = strrchr(line, '}');
     if (!start || !end || start >= end)
         return (cmd);
     args = kmalloc(end - start, GFP_KERNEL);
@@ -85,7 +84,6 @@ parsed_cmd_t parse_line(const char *line)
     args[end - start - 1] = '\0';
     if (cmd.type == CMD_ADD)
     {
-        printk(KERN_INFO "here\n");
         parse_arguments(&cmd, args);
     }
     else if (cmd.type == CMD_SWITCH)
@@ -95,11 +93,11 @@ parsed_cmd_t parse_line(const char *line)
         char *first_token = strsep(&p, ",");
         char *second_token = strsep(&p, ",");
     
-        if (first_token && strncmp(first_token, "ALIAS(", 6) == 0)
+        if (first_token && strncmp(first_token, "AS(", 3) == 0)
             cmd.arg1 = extract_value(first_token);
-        else
+        elses
             cmd.arg1 = kstrdup(first_token, GFP_KERNEL);
-        if (second_token && strncmp(second_token, "ALIAS(", 6) == 0)
+        if (second_token && strncmp(second_token, "AS(", 3) == 0)
             cmd.arg2 = extract_value(second_token);
         else
             cmd.arg2 = kstrdup(second_token, GFP_KERNEL);
