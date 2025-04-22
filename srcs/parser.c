@@ -38,6 +38,7 @@ void parse_arguments(parsed_cmd_t *cmd, const char *args)
     if (!copy)
         return;
     p = copy;
+    printk(KERN_INFO "IN PARSE_ARGS \n");
     while ((token = strsep(&p, ";")) != NULL)
     {
         while (*token == ' ')
@@ -78,7 +79,10 @@ parsed_cmd_t parse_line(const char *line)
     strncpy(args, start + 1, end - start - 1);
     args[end - start - 1] = '\0';
     if (cmd.type == CMD_ADD)
+    {
+        printk(KERN_INFO "here\n");
         parse_arguments(&cmd, args);
+    }
     else if (cmd.type == CMD_SWITCH)
     {
         char *args_copy = kstrdup(args, GFP_KERNEL);
