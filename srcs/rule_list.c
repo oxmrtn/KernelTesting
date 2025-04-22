@@ -95,7 +95,7 @@ int find_rule_index_by_alias(const char *alias)
     {
         printk(KERN_INFO "TO FIND = %s || current = %s \n", alias, curr->rule.alias);
         if (curr->rule.alias && alias && strcmp(curr->rule.alias, alias) == 0)
-            return (printk(KENR_INFO "ALIAS = %s found ?! \n", alias), index);
+            return (printk(KERN_INFO "ALIAS = %s found ?! \n", alias), index);
         curr = curr->next;
         index++;
     }
