@@ -65,26 +65,27 @@ void switch_rules(int i, int j)
 {
     struct rule_node *node1 = NULL;
     struct rule_node *node2 = NULL;
-    struct rule_node *current = rule_list_head;
+    struct rule_node *cursor = rule_list_head;
     int index = 0;
     if (i == j)
     {
         printk(KERN_INFO "[Switch] Indices identiques (%d), rien à faire.\n", i);
         return;
     }
-    while (current) {
+    while (cursor) {
         if (index == i)
-            node1 = current;
+            node1 = cursor;
         else if (index == j)
-            node2 = current;
+            node2 = cursor;
         if (node1 && node2)
             break;
-        current = current->next;
+        cursor = cursor->next;
         index++;
     }
 
-    if (!node1 || !node2) {
-        printk(KERN_ERR "[Switch] Indices invalides : i=%d, j=%d\n", i, j);
+    if (!node1 || !node2)
+    {
+        printk(KERN_ERR "[Switch] error : index out of bound. \n");
         return;
     }
     rule_t tmp = node1->rule;
