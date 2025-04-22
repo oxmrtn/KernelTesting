@@ -29,13 +29,43 @@ static ssize_t proc_write(struct file *file, const char __user *ubuf, size_t cou
                  cmd.rule.gid, cmd.rule.pid, cmd.rule.right, cmd.rule.alias);
         printk(KERN_INFO "  %s", rule_buffer);
     }
-    else if (cmd.type == CMD_SWITCH) {
-        snprintf(rule_buffer, BUF_SIZE, "SWITCH: %s <-> %s\n", cmd.arg1, cmd.arg2);
-        printk(KERN_INFO "  %s", rule_buffer);
+    else if (cmd.type == CMD_SWITCH)
+    {
+        int index1 = -1, index2 = -1;
+    
+        if (cmd.arg1 && strspn(cmd.arg1, "0123456789") == strlen(cmd.arg1))
+            index1 = simple_strtol(cmd.arg1, NULL, 10);
+        else
+            index1 = find_rule_index_by_alias(cmd.arg1);
+        if (cmd.arg2 && strspn(cmd.arg2, "0123456789") == strlen(cmd.arg2))
+            index2 = simple_strtol(cmd.arg2, NULL, 10);
+        else
+            index2 = find_rule_index_by_alias(cmd.arg2);
+        if (index1 >= 0 && index2 >= 0)
+            switch_rules(index1, index2);
+        else
+            printk(KERN_ERR "[Switch] error : rules not found \n");
     }
     else if (cmd.type == CMD_DISPLAY)
     {
         display_rule_list();
+    }
+    else if (cmd.type == CMD_REMOVE)
+    {
+        int index = -1;
+        if (cmd.arg1 && strspn(cmd.arg1, "0123456789") == strlen(cmd.arg1))
+            index = simple_strtol(cmd.arg1, NULL, 10);
+        else
+            index = find_rule_index_by_alias(cmd.arg1);
+    
+        if (index >= 0)
+            remove_rule_by_index(index);
+        else
+            printk(KERN_ERR "[Remove] error : rules not found.\n");
+    }
+    else if (cmd.type == CMD_UNKNOWN)
+    {
+        printk(KERN_ERR "error: Syntax error detected \n");
     }
     free_cmd(&cmd);
     return (count);

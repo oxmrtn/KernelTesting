@@ -64,6 +64,9 @@ void            parse_arguments(parsed_cmd_t *cmd, const char *args);
 void            add_rule_to_list(rule_t *rule);
 void            free_rule_list(void);
 void            display_rule_list(void);
+void            switch_rules(int i, int j);
+int             find_rule_index_by_alias(const char *alias);
+void            remove_rule_by_index(int index);
 
 extern char rule_buffer[BUF_SIZE];
 

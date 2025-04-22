@@ -77,18 +77,31 @@ parsed_cmd_t parse_line(const char *line)
         return (cmd);
     strncpy(args, start + 1, end - start - 1);
     args[end - start - 1] = '\0';
-    if (cmd.type == CMD_ADD || cmd.type == CMD_REMOVE)
+    if (cmd.type == CMD_ADD)
         parse_arguments(&cmd, args);
     else if (cmd.type == CMD_SWITCH)
     {
-        char *first = extract_value(args);
-        char *next_quote = strchr(args + 1, '\"');
-        next_quote = next_quote ? strchr(next_quote + 1, '\"') : NULL;
-        char *second = NULL;
-        if (next_quote)
-            second = extract_value(next_quote - 1);
-        cmd.arg1 = first;
-        cmd.arg2 = second;
+        char *args_copy = kstrdup(args, GFP_KERNEL);
+        char *p = args_copy;
+        char *first_token = strsep(&p, ",");
+        char *second_token = strsep(&p, ",");
+    
+        if (first_token && strncmp(first_token, "ALIAS(", 6) == 0)
+            cmd.arg1 = extract_value(first_token);
+        else
+            cmd.arg1 = kstrdup(first_token, GFP_KERNEL);
+        if (second_token && strncmp(second_token, "ALIAS(", 6) == 0)
+            cmd.arg2 = extract_value(second_token);
+        else
+            cmd.arg2 = kstrdup(second_token, GFP_KERNEL);
+        kfree(args_copy);
+    }
+    else if (cmd.type == CMD_REMOVE)
+    {
+        if (strncmp(args, "ALIAS(", 6) == 0)
+            cmd.arg1 = extract_value(args);
+        else
+            cmd.arg1 = kstrdup(args, GFP_KERNEL);
     }
     kfree(args);
     return (cmd);

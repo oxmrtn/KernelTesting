@@ -3,6 +3,14 @@
 
 static struct rule_node *rule_list_head = NULL;
 
+
+
+void    remove_cmd(parsed_cmd_t * cmd)
+{
+
+}
+
+
 void add_rule_to_list(rule_t *new_rule)
 {
     struct rule_node *node = kmalloc(sizeof(struct rule_node), GFP_KERNEL);
@@ -53,3 +61,77 @@ void free_rule_list(void)
     return ;
 }
 
+void switch_rules(int i, int j)
+{
+    struct rule_node *node1 = NULL;
+    struct rule_node *node2 = NULL;
+    struct rule_node *current = rule_list_head;
+    int index = 0;
+    if (i == j)
+    {
+        printk(KERN_INFO "[Switch] Indices identiques (%d), rien à faire.\n", i);
+        return;
+    }
+    while (current) {
+        if (index == i)
+            node1 = current;
+        else if (index == j)
+            node2 = current;
+        if (node1 && node2)
+            break;
+        current = current->next;
+        index++;
+    }
+
+    if (!node1 || !node2) {
+        printk(KERN_ERR "[Switch] Indices invalides : i=%d, j=%d\n", i, j);
+        return;
+    }
+    rule_t tmp = node1->rule;
+    node1->rule = node2->rule;
+    node2->rule = tmp;
+
+    printk(KERN_INFO "[Switch] Règles %d et %d interchangées avec succès.\n", i, j);
+}
+
+int find_rule_index_by_alias(const char *alias)
+{
+    struct rule_node *curr = rule_list_head;
+    int index = 0;
+    while (curr)
+    {
+        if (curr->rule.alias && strcmp(curr->rule.alias, alias) == 0)
+            return (index);
+        curr = curr->next;
+        index++;
+    }
+    return (-1);
+}
+
+void remove_rule_by_index(int index)
+{
+    struct rule_node *curr = rule_list_head;
+    struct rule_node *prev = NULL;
+    int i = 0;
+
+    while (curr && i < index)
+    {
+        prev = curr;
+        curr = curr->next;
+        i++;
+    }
+    if (!curr)
+    {
+        printk(KERN_ERR "[Remove] error : Index out of bound.\n");
+        return;
+    }
+    if (!prev)
+        rule_list_head = curr->next;
+    else
+        prev->next = curr->next;
+    kfree(curr->rule.path);
+    kfree(curr->rule.alias);
+    kfree(curr);
+}
+
+ 
