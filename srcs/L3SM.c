@@ -42,7 +42,7 @@ static ssize_t proc_write(struct file *file, const char __user *ubuf, size_t cou
             index2 = simple_strtol(cmd.arg2, NULL, 10);
         else
             index2 = find_rule_index_by_alias(cmd.arg2);
-        printk(KERN_INFO "DEBUG SWITCH : index 1 = %d 77 index 2 = %d \n", index1, index2);
+        printk(KERN_INFO "DEBUG SWITCH : index 1 = %d && index 2 = %d \n", index1, index2);
         if (index1 >= 0 && index2 >= 0)
             switch_rules(index1, index2);
         else
