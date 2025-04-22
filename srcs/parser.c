@@ -4,16 +4,21 @@
 char *extract_value(const char *input)
 {
     const char *start = strchr(input, '\"');
-    const char *end = strrchr(input, '\"');
-    char *value;
+    if (!start)
+        return NULL;
 
-    if (!start || !end || start == end)
-        return (NULL);
-    value = kmalloc(end - start, GFP_KERNEL);
+    const char *end = strchr(start + 1, '\"');
+    if (!end)
+        return NULL;
+
+    size_t len = end - start - 1;
+    char *value = kmalloc(len + 1, GFP_KERNEL);
     if (!value)
-        return (NULL);
-    strncpy(value, start + 1, end - start - 1);
-    value[end - start - 1] = '\0';
+        return NULL;
+
+    strncpy(value, start + 1, len);
+    value[len] = '\0';
+
     return value;
 }
 
