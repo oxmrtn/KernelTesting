@@ -62,10 +62,11 @@ void switch_rules(int i, int j)
     int index = 0;
     if (i == j)
     {
-        printk(KERN_INFO "[Switch] Indices identiques (%d), rien à faire.\n", i);
+        printk(KERN_INFO "[Switch] Nothing to do.\n");
         return;
     }
-    while (cursor) {
+    while (cursor)
+    {
         if (index == i)
             node1 = cursor;
         else if (index == j)
@@ -75,7 +76,6 @@ void switch_rules(int i, int j)
         cursor = cursor->next;
         index++;
     }
-
     if (!node1 || !node2)
     {
         printk(KERN_ERR "[Switch] error : index out of bound. \n");
@@ -94,7 +94,7 @@ int find_rule_index_by_alias(const char *alias)
     int index = 0;
     while (curr)
     {
-        if (curr->rule.alias && strcmp(curr->rule.alias, alias) == 0)
+        if (curr->rule.alias && alias && strcmp(curr->rule.alias, alias) == 0)
             return (index);
         curr = curr->next;
         index++;
