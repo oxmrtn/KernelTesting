@@ -20,8 +20,9 @@ static ssize_t proc_write(struct file *file, const char __user *ubuf, size_t cou
     buf[count] = '\0';
     cmd = parse_line(buf);
     printk(KERN_INFO "[Parser] Command type: %d\n", cmd.type);
-    if (cmd.type == CMD_ADD || cmd.type == CMD_REMOVE)
+    if (cmd.type == CMD_ADD)
     {
+        printk(KERN_INFO "ADDING THINGS \n";)
         add_rule_to_list(&cmd.rule);
         snprintf(rule_buffer, BUF_SIZE,
                  "PATH: %s\nRULE: %s\nUID: %s\nUSER: %s\nGID: %s\nPID: %s\nRIGHT: %s\nALIAS: %s\n",
