@@ -5,21 +5,18 @@ char *extract_value(const char *input)
 {
     const char *start = strchr(input, '\"');
     if (!start)
-        return NULL;
+        return (NULL);
 
     const char *end = strchr(start + 1, '\"');
     if (!end)
-        return NULL;
-
+        return (NULL);
     size_t len = end - start - 1;
     char *value = kmalloc(len + 1, GFP_KERNEL);
     if (!value)
-        return NULL;
-
+        return (NULL);
     strncpy(value, start + 1, len);
     value[len] = '\0';
-
-    return value;
+    return (value);
 }
 
 cmd_type_t get_cmd_type(const char *line)
@@ -43,7 +40,7 @@ void parse_arguments(parsed_cmd_t *cmd, const char *args)
     if (!copy)
         return;
     p = copy;
-    while ((token = strsep(&p, ",")) != NULL)
+    while ((token = strsep(&p, ";")) != NULL)
     {
         while (*token == ' ')
             token++;
