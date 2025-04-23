@@ -13,6 +13,7 @@
 
 #define PROC_DIR_NAME "L3SM"
 #define PROC_FILE_NAME "rules"
+#define PROC_FILE_LOG "logs"
 #define BUF_SIZE 512
 
 

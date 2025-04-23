@@ -67,6 +67,16 @@ void parse_arguments(parsed_cmd_t *cmd, const char *args)
     kfree(copy);
 }
 
+int empty_rule(const rule_t *tocheck)
+{
+    if (!tocheck->path || !tocheck->right)
+        return (1);
+    if (!tocheck->uid && !tocheck->user && !tocheck->gid && !tocheck->pid)
+        return (1);
+    return (0);
+}
+
+
 parsed_cmd_t parse_line(const char *line)
 {
     char *args, *start, *end;
@@ -109,6 +119,10 @@ parsed_cmd_t parse_line(const char *line)
             cmd.arg1 = extract_value(args);
         else
             cmd.arg1 = kstrdup(args, GFP_KERNEL);
+    }
+    else if (empty_rules(cmd.rule))
+    {
+        cmd.type = CMD_UNKNOWN;
     }
     kfree(args);
     return (cmd);
