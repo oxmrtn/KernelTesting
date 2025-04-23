@@ -73,6 +73,20 @@ int empty_rules(const rule_t tocheck)
     return (0);
 }
 
+int invalid_name(const char *name)
+{
+    if (!name)
+        return (0);
+    struct rule_node *curr = rule_list_head;
+    while (curr)
+    {
+        if (strcmp(curr->rule.alias, name) == 0)
+            return (1);
+        curr = curr->next;
+    }
+    return (0);
+}
+
 
 parsed_cmd_t parse_line(const char *line)
 {
@@ -119,7 +133,7 @@ parsed_cmd_t parse_line(const char *line)
         else
             cmd.arg1 = kstrdup(args, GFP_KERNEL);
     }
-    else if (empty_rules(cmd.rule))
+    else if (empty_rules(cmd.rule) || invalid_name(cmd.rule.alias))
     {
         cmd.type = CMD_UNKNOWN;
     }

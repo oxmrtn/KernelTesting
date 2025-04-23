@@ -5,14 +5,23 @@ static struct rule_node *rule_list_head = NULL;
 void add_rule_to_list(rule_t *new_rule)
 {
     struct rule_node *node = kmalloc(sizeof(struct rule_node), GFP_KERNEL);
+    struct rule_node *cursor;
 
     if (!node)
         return;
     #define DUP(field) node->rule.field = new_rule->field ? kstrdup(new_rule->field, GFP_KERNEL) : NULL
     DUP(path); DUP(rule); DUP(uid); DUP(user);
     DUP(gid); DUP(pid); DUP(right); DUP(alias);
-    node->next = rule_list_head;
-    rule_list_head = node;
+    node->next = NULL;
+    if (!rule_list_head)
+    {
+        rule_list_head = node;
+        return;
+    }
+    cursor = rule_list_head;
+    while (cursor->next)
+        cursor = cursor->next;
+    cursor->next = node;
 }
 
 void display_rule_list(void)
@@ -89,10 +98,13 @@ int find_rule_index_by_alias(const char *alias)
 {
     struct rule_node *curr = rule_list_head;
     int index = 0;
+
+    if (!alias)
+        return (-1);
     while (curr)
     {
         if (curr->rule.alias && alias && strcmp(curr->rule.alias, alias) == 0)
-            return (printk(KERN_INFO "ALIAS = %s found ?! \n", alias), index);
+            return (index);
         curr = curr->next;
         index++;
     }
