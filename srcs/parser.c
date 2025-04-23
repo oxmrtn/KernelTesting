@@ -46,8 +46,6 @@ void parse_arguments(parsed_cmd_t *cmd, const char *args)
             token++;
         if (strncmp(token, "PATH(", 5) == 0)
             cmd->rule.path = extract_value(token);
-        else if (strncmp(token, "RULE(", 5) == 0)
-            cmd->rule.rule = extract_value(token);
         else if (strncmp(token, "UID(", 4) == 0)
             cmd->rule.uid = extract_value(token);
         else if (strncmp(token, "USER(", 5) == 0)
@@ -129,7 +127,6 @@ parsed_cmd_t parse_line(const char *line)
 void free_cmd(parsed_cmd_t *cmd)
 {
     kfree(cmd->rule.path);
-    kfree(cmd->rule.rule);
     kfree(cmd->rule.uid);
     kfree(cmd->rule.user);
     kfree(cmd->rule.gid);

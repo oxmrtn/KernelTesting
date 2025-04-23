@@ -29,7 +29,6 @@ typedef enum {
 
 typedef struct {
     char *path;
-    char *rule;
     char *uid;
     char *user;
     char *gid;
