@@ -69,9 +69,8 @@ void            display_rule_list(void);
 void            switch_rules(int i, int j);
 int             find_rule_index_by_alias(const char *alias);
 void            remove_rule_by_index(int index);
+int             invalid_name(const char *name);
 
 extern char rule_buffer[BUF_SIZE];
-
-struct rule_node *rule_list_head = NULL;
 
 #endif

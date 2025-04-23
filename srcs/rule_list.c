@@ -1,5 +1,7 @@
 #include "../includes/L3SM.h"
 
+static struct rule_node *rule_list_head = NULL;
+
 void add_rule_to_list(rule_t *new_rule)
 {
     struct rule_node *node = kmalloc(sizeof(struct rule_node), GFP_KERNEL);
@@ -20,6 +22,20 @@ void add_rule_to_list(rule_t *new_rule)
     while (cursor->next)
         cursor = cursor->next;
     cursor->next = node;
+}
+
+int invalid_name(const char *name)
+{
+    if (!name)
+        return (0);
+    struct rule_node *curr = rule_list_head;
+    while (curr)
+    {
+        if (strcmp(curr->rule.alias, name) == 0)
+            return (1);
+        curr = curr->next;
+    }
+    return (0);
 }
 
 void display_rule_list(void)
