@@ -67,11 +67,11 @@ void parse_arguments(parsed_cmd_t *cmd, const char *args)
     kfree(copy);
 }
 
-int empty_rules(const rule_t *tocheck)
+int empty_rules(const rule_t tocheck)
 {
-    if (!tocheck->path || !tocheck->right)
+    if (!tocheck.path || !tocheck.right)
         return (1);
-    if (!tocheck->uid && !tocheck->user && !tocheck->gid && !tocheck->pid)
+    if (!tocheck.uid && !tocheck.user && !tocheck.gid && !tocheck.pid)
         return (1);
     return (0);
 }
@@ -105,8 +105,10 @@ parsed_cmd_t parse_line(const char *line)
     
         if (first_token && strncmp(first_token, "AS(", 3) == 0)
             cmd.arg1 = extract_value(first_token);
-        elses
+        else
+        {
             cmd.arg1 = kstrdup(first_token, GFP_KERNEL);
+        }
         if (second_token && strncmp(second_token, "AS(", 3) == 0)
             cmd.arg2 = extract_value(second_token);
         else

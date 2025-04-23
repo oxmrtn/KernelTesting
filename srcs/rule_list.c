@@ -1,8 +1,6 @@
 #include "../includes/L3SM.h"
 
-
 static struct rule_node *rule_list_head = NULL;
-
 
 void add_rule_to_list(rule_t *new_rule)
 {
@@ -93,7 +91,6 @@ int find_rule_index_by_alias(const char *alias)
     int index = 0;
     while (curr)
     {
-        printk(KERN_INFO "TO FIND = %s || current = %s \n", alias, curr->rule.alias);
         if (curr->rule.alias && alias && strcmp(curr->rule.alias, alias) == 0)
             return (printk(KERN_INFO "ALIAS = %s found ?! \n", alias), index);
         curr = curr->next;
@@ -127,5 +124,3 @@ void remove_rule_by_index(int index)
     kfree(curr->rule.alias);
     kfree(curr);
 }
-
- 

@@ -55,6 +55,7 @@ struct rule_node {
 
 parsed_cmd_t    parse_line(const char *line);
 void            free_cmd(parsed_cmd_t *cmd);
+int             empty_rules(const rule_t tocheck);
 char            *extract_value(const char *input);
 cmd_type_t      get_cmd_type(const char *line);
 void            parse_arguments(parsed_cmd_t *cmd, const char *args);
