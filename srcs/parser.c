@@ -99,8 +99,8 @@ parsed_cmd_t parse_line(const char *line)
     {
         char *args_copy = kstrdup(args, GFP_KERNEL);
         char *p = args_copy;
-        char *first_token = strsep(&p, ",");
-        char *second_token = strsep(&p, ",");
+        char *first_token = strsep(&p, ";");
+        char *second_token = strsep(&p, ";");
     
         if (first_token && strncmp(first_token, "AS(", 3) == 0)
             cmd.arg1 = extract_value(first_token);
