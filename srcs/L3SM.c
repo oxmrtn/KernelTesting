@@ -33,7 +33,6 @@ static ssize_t proc_write(struct file *file, const char __user *ubuf, size_t cou
     {
         int index1 = -1, index2 = -1;
     
-        printk("arg1 = |%s| && arg2 = |%s|\n", cmd.arg1, cmd.arg2);
         if (cmd.arg1 && strspn(cmd.arg1, "0123456789") == strlen(cmd.arg1))
             index1 = simple_strtol(cmd.arg1, NULL, 10);
         else

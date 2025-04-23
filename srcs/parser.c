@@ -105,7 +105,6 @@ parsed_cmd_t parse_line(const char *line)
             first_token = strim(first_token);
         if (second_token)
             second_token = strim(second_token);
-        printk(KERN_INFO "FIRST TOKEN = %s || second token= %s \n", first_token, second_token);
         if (first_token && strncmp(first_token, "AS(", 3) == 0)
             cmd.arg1 = extract_value(first_token);
         else
