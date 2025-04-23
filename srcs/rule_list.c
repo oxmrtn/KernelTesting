@@ -1,7 +1,5 @@
 #include "../includes/L3SM.h"
 
-static struct rule_node *rule_list_head = NULL;
-
 void add_rule_to_list(rule_t *new_rule)
 {
     struct rule_node *node = kmalloc(sizeof(struct rule_node), GFP_KERNEL);
