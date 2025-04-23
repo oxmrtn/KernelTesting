@@ -72,5 +72,6 @@ void            remove_rule_by_index(int index);
 
 extern char rule_buffer[BUF_SIZE];
 
+struct rule_node *rule_list_head = NULL;
 
 #endif
