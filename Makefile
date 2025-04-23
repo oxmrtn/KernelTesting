@@ -28,5 +28,5 @@ push:
 
 test:
 	sudo insmod L3SM.ko
-	echo 'ADD{PATH("/tmp"); RIGHT("N"); UID("12345"); ALIAS("rules1")};' > /proc/L3SM/rules
-	echo 'ADD{PATH("/tmp"); RIGHT("X"); UID("56789"); ALIAS("rules2")};' > /proc/L3SM/rules
+	echo 'ADD{PATH("/tmp"); RIGHT("N"); UID("12345"); AS("rules1")};' > /proc/L3SM/rules
+	echo 'ADD{PATH("/tmp"); RIGHT("X"); UID("56789"); AS("rules2")};' > /proc/L3SM/rules
