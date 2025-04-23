@@ -117,14 +117,14 @@ static int __init rule_parser_init(void)
         printk(KERN_ERR "Failed to create /proc/L3SM/rule file\n");
         return (-ENOMEM);
     }
-    if (!proc_create(PROC_FILE_LOG, 0666, dir, &proc_file_ops))
+    if (!proc_create(PROC_FILE_LOG, 0666, dir, &proc_logs_ops))
     {
         remove_proc_entry(PROC_FILE_NAME, NULL);
         remove_proc_entry(PROC_DIR_NAME, NULL);
         printk(KERN_ERR "Failed to create /proc/L3SM/logs file\n");
         return (-ENOMEM);
     }
-    printk(KERN_INFO "Rule Parser module loaded and /proc/L3SM/rule created.\n");
+    printk(KERN_INFO "Rule Parser module loaded, /proc/L3SM/rule and /proc/L3SM/logs created.\n");
     return (0);
 }
 

@@ -67,7 +67,7 @@ void parse_arguments(parsed_cmd_t *cmd, const char *args)
     kfree(copy);
 }
 
-int empty_rule(const rule_t *tocheck)
+int empty_rules(const rule_t *tocheck)
 {
     if (!tocheck->path || !tocheck->right)
         return (1);
