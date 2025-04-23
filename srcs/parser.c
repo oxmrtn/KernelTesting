@@ -79,7 +79,12 @@ parsed_cmd_t parse_line(const char *line)
     cmd.type = get_cmd_type(line);
     start = strchr(line, '{');
     end = strrchr(line, '}');
-    if (!start || !end || start >= end)
+    if (!start || !end)
+    {
+        cmd.type = CMD_UNKNOWN;
+        return (cmd);
+    }
+    if (start >= end || (start + 1 == end))
         return (cmd);
     args = kmalloc(end - start, GFP_KERNEL);
     if (!args)
