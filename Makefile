@@ -30,3 +30,14 @@ test:
 	sudo insmod L3SM.ko
 	echo 'ADD{PATH("/tmp"); RIGHT("N"); UID("12345"); AS("rules1")};' > /proc/L3SM/rules
 	echo 'ADD{PATH("/tmp"); RIGHT("X"); UID("56789"); AS("rules2")};' > /proc/L3SM/rules
+	echo 'DISPLAY{};' > proc/L3SM/rules
+
+
+testSWAP:
+	echo 'SWITCH{0;1}' > /proc/L3SM/rules
+	echo 'DISPLAY{};' > proc/L3SM/rules
+	echo 'SWITCH{AS("rules1"); AS("rules2")};' > /proc/L3SM/rules
+
+testRM:
+	echo 'REMOVE{1};' > /proc/L3SM/rules
+	echo 'DISPLAY{};' > proc/L3SM/rules
