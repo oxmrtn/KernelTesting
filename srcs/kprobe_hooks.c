@@ -83,7 +83,6 @@ char *get_path(const struct path *path)
         kfree(buf);
         return NULL;
     }
-
     return buf;
 }
 
@@ -91,41 +90,43 @@ static int hook_entry_inode_permissions(struct kretprobe_instance *ri, struct pt
 {
     struct probs_data *data = (struct probs_data *)ri->data;
     data->block = false;
-
-    struct inode *inode = (struct inode *)REG_ARG0(regs);
-    struct dentry *dentry = NULL;
-    struct path path;
-    char *buf = NULL;
-    char *pathname = NULL;
-
-    dentry = d_find_alias(inode);
-    if (!dentry)
-        goto log_null;
-
-    path.dentry = dentry;
-    path.mnt = NULL;
-
-    buf = kmalloc(PATH_MAX, GFP_KERNEL);
-    if (!buf) {
-        dput(dentry);
-        return 1;
-    }
-
-    pathname = dentry_path_raw(dentry, buf, PATH_MAX);
-    if (!IS_ERR(pathname)) {
-        log_kern(current->pid, pathname);
-        log_proc(current->pid, pathname);
-    }
-    else
+    if (1) // NEED TO BE MODIFIED WITH RULES_MANAGER
     {
-        log_null:
-        log_kern(current->pid, NULL);
-        log_proc(current->pid, NULL);
-    }
+        struct inode *inode = (struct inode *)REG_ARG0(regs);
+        struct dentry *dentry = NULL;
+        struct path path;
+        char *buf = NULL;
+        char *pathname = NULL;
 
-    if (dentry)
-        dput(dentry);
-    kfree(buf);
+        dentry = d_find_alias(inode);
+        if (!dentry)
+            goto log_null;
+
+        path.dentry = dentry;
+        path.mnt = NULL;
+
+        buf = kmalloc(PATH_MAX, GFP_KERNEL);
+        if (!buf) {
+            dput(dentry);
+            return 1;
+        }
+
+        pathname = dentry_path_raw(dentry, buf, PATH_MAX);
+        if (!IS_ERR(pathname)) {
+            log_kern(current->pid, pathname);
+            log_proc(current->pid, pathname);
+        }
+        else
+        {
+            log_null:
+            log_kern(current->pid, NULL);
+            log_proc(current->pid, NULL);
+        }
+
+        if (dentry)
+            dput(dentry);
+        kfree(buf);
+    }
     return 0;
 }
 
@@ -138,7 +139,7 @@ static int hook_entry_file_permissions(struct kretprobe_instance *ri, struct pt_
     data->block = false;
     printk(KERN_INFO "L3SM - PROBES - FILE PERMISSION TRIGGERED [pid=%d %s]\n", current->pid, current->comm);
 
-    if (1)
+    if (1) // NEED TO BE MODIFIED WITH RULES_MANAGER
     {
         struct file *file = (struct file *)REG_ARG0(regs);
         char * path;
@@ -158,7 +159,7 @@ static int hook_entry_file_open(struct kretprobe_instance *ri, struct pt_regs *r
     data = (struct probs_data *)ri->data;
     data->block = false;
     printk(KERN_INFO "L3SM - PROBES - FILE OPEN TRIGGERED [pid=%d %s]\n", current->pid, current->comm);
-    if (1)
+    if (1) // NEED TO BE MODIFIED WITH RULES_MANAGER
     {
         struct file *file = (struct file *)REG_ARG0(regs);
         char * path;
