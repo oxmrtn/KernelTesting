@@ -1,6 +1,8 @@
 #include "../includes/L3SM.h"
+#include "../includes/arch_regs.h"
 #include <linux/kprobes.h>
 #include <linux/sched.h>
+
 
 
 
@@ -90,7 +92,7 @@ static int hook_entry_inode_permissions(struct kretprobe_instance *ri, struct pt
     struct probs_data *data = (struct probs_data *)ri->data;
     data->block = false;
 
-    struct inode *inode = (struct inode *)regs->di;
+    struct inode *inode = (struct inode *)REG_ARG0(regs);
     struct dentry *dentry = NULL;
     struct path path;
     char *buf = NULL;
@@ -101,7 +103,7 @@ static int hook_entry_inode_permissions(struct kretprobe_instance *ri, struct pt
         goto log_null;
 
     path.dentry = dentry;
-    path.mnt = NULL;  // On ne connaît pas le mount, donc NULL (non parfait, mais toléré pour un log)
+    path.mnt = NULL;
 
     buf = kmalloc(PATH_MAX, GFP_KERNEL);
     if (!buf) {
@@ -138,7 +140,7 @@ static int hook_entry_file_permissions(struct kretprobe_instance *ri, struct pt_
 
     if (1)
     {
-        struct file *file = (struct file *)regs->di;
+        struct file *file = (struct file *)REG_ARG0(regs);
         char * path;
 
         path = get_path(&file->f_path);
@@ -158,7 +160,7 @@ static int hook_entry_file_open(struct kretprobe_instance *ri, struct pt_regs *r
     printk(KERN_INFO "L3SM - PROBES - FILE OPEN TRIGGERED [pid=%d %s]\n", current->pid, current->comm);
     if (1)
     {
-        struct file *file = (struct file *)regs->di;
+        struct file *file = (struct file *)REG_ARG0(regs);
         char * path;
 
         path = get_path(&file->f_path);
@@ -175,6 +177,6 @@ static int hook_exit_handler(struct kretprobe_instance *ri, struct pt_regs *regs
     struct probs_data *data = (struct probs_data *)ri->data;
 
     if (data && data->block)
-        regs->ax = -EACCES;
+        SET_RET(regs, -EACCES);
     return 0;
 }
