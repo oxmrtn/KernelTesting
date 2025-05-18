@@ -8,6 +8,12 @@
 #include <linux/uaccess.h>
 #include <linux/slab.h>
 #include <linux/string.h> 
+#include <linux/dcache.h>
+#include <linux/path.h>
+#include <linux/fs.h>
+#include <linux/slab.h>
+#include <linux/seq_file.h>
+#include <linux/mm.h>
 
 
 // -------------- DEFINE -------------
@@ -45,11 +51,24 @@ typedef struct {
     char *arg2;
 } parsed_cmd_t;
 
-struct rule_node {
+struct rule_node
+{
     rule_t rule;
     struct rule_node *next;
+}; 
+
+struct probs_data
+{
+    bool block;
 };
 
+struct log_chain
+{
+    char *log;
+    struct log_chain *next;
+};
+
+extern struct log_chain *logs_list_head;
 
 // ------------PARSER---------------
 
@@ -74,7 +93,15 @@ int             invalid_name(const char *name);
 
 // --------------PROBES-------------
 int init_probes(void);
+char *get_path(const struct path *path);
+int exit_probes(void);
 
+
+// -------------LOGGER--------------
+int log_kern(int pid, char *path);
+int log_proc(int pid, char *path);
+void free_logs(void);
+void add_log(const char *msg);
 
 extern char rule_buffer[BUF_SIZE];
 

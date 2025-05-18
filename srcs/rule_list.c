@@ -149,3 +149,4 @@ void remove_rule_by_index(int index)
     kfree(curr->rule.alias);
     kfree(curr);
 }
+

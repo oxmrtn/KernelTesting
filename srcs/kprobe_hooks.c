@@ -1,53 +1,52 @@
 #include "../includes/L3SM.h"
 #include <linux/kprobes.h>
-#include <linux/sched.h>  // pour current->pid, current->comm
+#include <linux/sched.h>
 
-// Prototypes des handlers
+
+
 static int hook_entry_file_permissions(struct kretprobe_instance *ri, struct pt_regs *regs);
 static int hook_entry_inode_permissions(struct kretprobe_instance *ri, struct pt_regs *regs);
 static int hook_entry_file_open(struct kretprobe_instance *ri, struct pt_regs *regs);
 static int hook_exit_handler(struct kretprobe_instance *ri, struct pt_regs *regs);
 
-// Symboles cibles
+
 static const char *fileopen_hook_name        = "security_file_open";
 static const char *filepermissions_hook_name = "security_file_permission";
 static const char *inodepermissions_hook_name = "security_inode_permission";
 
-// Déclaration des probes
 static struct kretprobe fileopen_probe = {
     .handler        = hook_exit_handler,
     .entry_handler  = hook_entry_file_open,
-    .data_size      = 0,
+    .data_size      = sizeof(struct probs_data),
     .maxactive      = NR_CPUS,
 };
 
 static struct kretprobe filepermissions_probe = {
     .handler        = hook_exit_handler,
     .entry_handler  = hook_entry_file_permissions,
-    .data_size      = 0,
+    .data_size      = sizeof(struct probs_data),
     .maxactive      = NR_CPUS,
 };
 
 static struct kretprobe inodepermissions_probe = {
     .handler        = hook_exit_handler,
     .entry_handler  = hook_entry_inode_permissions,
-    .data_size      = 0,
+    .data_size      = sizeof(struct probs_data),
     .maxactive      = NR_CPUS,
 };
 
-// Macro d'enregistrement de kretprobe
 static inline int set_kretprobe(struct kretprobe *kp, const char *name)
 {
     kp->kp.symbol_name = name;
     if (register_kretprobe(kp) < 0) {
-        pr_err("L3SM - Failed to register kretprobe for %s\n", kp->kp.symbol_name);
+        pr_err("L3SM - Registering kprobes failed%s\n", kp->kp.symbol_name);
         return -1;
     }
-    pr_info("L3SM - Registered kretprobe for %s\n", kp->kp.symbol_name);
-    return 0;
+    pr_info("L3SM - Successfully registered kprobes %s\n", kp->kp.symbol_name);
+    return (0);
 }
 
-// Initialisation des probes
+
 int init_probes(void)
 {
     if (set_kretprobe(&fileopen_probe, fileopen_hook_name) < 0)
@@ -61,7 +60,6 @@ int init_probes(void)
     return 0;
 }
 
-// Nettoyage des probes
 int exit_probes(void)
 {
     unregister_kretprobe(&fileopen_probe);
@@ -70,29 +68,113 @@ int exit_probes(void)
     return 0;
 }
 
-// Handlers d'entrée
+char *get_path(const struct path *path)
+{
+    char *buf = kmalloc(PATH_MAX, GFP_KERNEL);
+    char *path_str;
+
+    if (!buf)
+        return NULL;
+
+    path_str = d_path(path, buf, PATH_MAX);
+    if (IS_ERR(path_str)) {
+        kfree(buf);
+        return NULL;
+    }
+
+    return buf;
+}
+
 static int hook_entry_inode_permissions(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
-    printk(KERN_INFO "L3SM - PROBES - INODE PERMISSION TRIGGERED [pid=%d %s]\n", current->pid, current->comm);
+    struct probs_data *data = (struct probs_data *)ri->data;
+    data->block = false;
+
+    struct inode *inode = (struct inode *)regs->di;
+    struct dentry *dentry = NULL;
+    struct path path;
+    char *buf = NULL;
+    char *pathname = NULL;
+
+    dentry = d_find_alias(inode);
+    if (!dentry)
+        goto log_null;
+
+    path.dentry = dentry;
+    path.mnt = NULL;  // On ne connaît pas le mount, donc NULL (non parfait, mais toléré pour un log)
+
+    buf = kmalloc(PATH_MAX, GFP_KERNEL);
+    if (!buf) {
+        dput(dentry);
+        return 1;
+    }
+
+    pathname = dentry_path_raw(dentry, buf, PATH_MAX);
+    if (!IS_ERR(pathname)) {
+        log_kern(current->pid, pathname);
+        log_proc(current->pid, pathname);
+    }
+    else
+    {
+        log_null:
+        log_kern(current->pid, NULL);
+        log_proc(current->pid, NULL);
+    }
+
+    if (dentry)
+        dput(dentry);
+    kfree(buf);
     return 0;
 }
 
+
 static int hook_entry_file_permissions(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
+    struct probs_data *data;
+
+    data = (struct probs_data *)ri->data;
+    data->block = false;
     printk(KERN_INFO "L3SM - PROBES - FILE PERMISSION TRIGGERED [pid=%d %s]\n", current->pid, current->comm);
+
+    if (1)
+    {
+        struct file *file = (struct file *)regs->di;
+        char * path;
+
+        path = get_path(&file->f_path);
+        log_kern(current->pid, path);
+        log_proc(current->pid, path);
+        kfree(path);
+    }
     return 0;
 }
 
 static int hook_entry_file_open(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
+    struct probs_data *data;
+
+    data = (struct probs_data *)ri->data;
+    data->block = false;
     printk(KERN_INFO "L3SM - PROBES - FILE OPEN TRIGGERED [pid=%d %s]\n", current->pid, current->comm);
+    if (1)
+    {
+        struct file *file = (struct file *)regs->di;
+        char * path;
+
+        path = get_path(&file->f_path);
+        log_kern(current->pid, path);
+        log_proc(current->pid, path);
+        kfree(path);
+        data->block = true;
+    }
     return 0;
 }
 
-// Handler de sortie
 static int hook_exit_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
-    // Exemple : blocage possible de l'appel
-    // regs->ax = -EACCES;
+    struct probs_data *data = (struct probs_data *)ri->data;
+
+    if (data && data->block)
+        regs->ax = -EACCES;
     return 0;
 }

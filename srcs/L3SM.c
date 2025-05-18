@@ -85,8 +85,29 @@ static ssize_t proc_read(struct file *file, char __user *ubuf, size_t count, lof
 
 static ssize_t log_read(struct file *file, char __user *ubuf, size_t count, loff_t *ppos)
 {
-    size_t len = strlen(log_buffer);
-    return (len);
+    struct log_chain *current_node = logs_list_head;
+    char *buf;
+    size_t len = 0;
+
+    if (*ppos > 0)
+        return 0;
+    buf = kmalloc(PAGE_SIZE, GFP_KERNEL);
+    if (!buf)
+        return -ENOMEM;
+    buf[0] = '\0';
+    while (current_node && len < PAGE_SIZE - 256) {
+        if (current_node->log) {
+            len += scnprintf(buf + len, PAGE_SIZE - len, "%s\n", current_node->log);
+        }
+        current_node = current_node->next;
+    }
+    if (copy_to_user(ubuf, buf, len)) {
+        kfree(buf);
+        return -EFAULT;
+    }
+    *ppos = len;
+    kfree(buf);
+    return len;
 }
 
 static struct proc_ops proc_file_ops = 
@@ -134,6 +155,7 @@ static int __init rule_parser_init(void)
 static void __exit rule_parser_exit(void)
 {
     free_rule_list();
+    free_logs();
     remove_proc_entry(PROC_FILE_NAME, NULL);
     remove_proc_entry(PROC_DIR_NAME, NULL);
     printk(KERN_INFO "Rule Parser module unloaded and /proc/L3SM removed.\n");
