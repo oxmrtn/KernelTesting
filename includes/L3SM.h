@@ -71,6 +71,11 @@ int             find_rule_index_by_alias(const char *alias);
 void            remove_rule_by_index(int index);
 int             invalid_name(const char *name);
 
+
+// --------------PROBES-------------
+int init_probes(void);
+
+
 extern char rule_buffer[BUF_SIZE];
 
 #endif
