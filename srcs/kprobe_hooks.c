@@ -89,44 +89,35 @@ char *get_path(const struct path *path)
 static int hook_entry_inode_permissions(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
     struct probs_data *data = (struct probs_data *)ri->data;
+    const struct cred *cred = current_cred();
     data->block = false;
-    if (1) // NEED TO BE MODIFIED WITH RULES_MANAGER
-    {
-        struct inode *inode = (struct inode *)REG_ARG0(regs);
-        struct dentry *dentry = NULL;
-        struct path path;
-        char *buf = NULL;
-        char *pathname = NULL;
+    struct inode *inode = (struct inode *)REG_ARG0(regs);
+    int mask = (int)REG_ARG2(regs);
+    struct dentry *dentry = NULL;
+    char *buf = NULL;
+    char *pathname = NULL;
 
-        dentry = d_find_alias(inode);
-        if (!dentry)
-            goto log_null;
-
-        path.dentry = dentry;
-        path.mnt = NULL;
-
-        buf = kmalloc(PATH_MAX, GFP_KERNEL);
-        if (!buf) {
-            dput(dentry);
-            return 1;
-        }
-
-        pathname = dentry_path_raw(dentry, buf, PATH_MAX);
-        if (!IS_ERR(pathname)) {
-            log_kern(current->pid, pathname);
-            log_proc(current->pid, pathname);
-        }
-        else
-        {
-            log_null:
-            log_kern(current->pid, NULL);
-            log_proc(current->pid, NULL);
-        }
-
-        if (dentry)
-            dput(dentry);
-        kfree(buf);
+    dentry = d_find_alias(inode);
+    if (!dentry)
+        goto done;
+    buf = kmalloc(PATH_MAX, GFP_KERNEL);
+    if (!buf) {
+        dput(dentry);
+        return 1;
     }
+    pathname = dentry_path_raw(dentry, buf, PATH_MAX);
+    if (IS_ERR(pathname))
+        pathname = NULL;
+    if (rule_check_access(cred->uid, cred->gid, current->pid, mask, pathname))
+    {
+        data->block = true;
+        log_kern(current->pid, pathname);
+        log_proc(current->pid, pathname);
+    }
+    done:
+    if (dentry)
+        dput(dentry);
+    kfree(buf);
     return 0;
 }
 
@@ -134,42 +125,41 @@ static int hook_entry_inode_permissions(struct kretprobe_instance *ri, struct pt
 static int hook_entry_file_permissions(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
     struct probs_data *data;
+    const struct cred *cred = current_cred();
+    int mask = (int)REG_ARG2(regs);
+    struct file *file = (struct file *)REG_ARG0(regs);
+    char * path;
 
     data = (struct probs_data *)ri->data;
     data->block = false;
-    printk(KERN_INFO "L3SM - PROBES - FILE PERMISSION TRIGGERED [pid=%d %s]\n", current->pid, current->comm);
-
-    if (1) // NEED TO BE MODIFIED WITH RULES_MANAGER
+    path = get_path(&file->f_path);
+    if (rule_check_access(cred->uid, cred->gid, current->pid, mask, path))
     {
-        struct file *file = (struct file *)REG_ARG0(regs);
-        char * path;
-
-        path = get_path(&file->f_path);
+        data->block = true;
         log_kern(current->pid, path);
         log_proc(current->pid, path);
-        kfree(path);
     }
+    kfree(path);
     return 0;
 }
 
 static int hook_entry_file_open(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
-    struct probs_data *data;
+    struct probs_data *data = (struct probs_data *)ri->data;
+    const struct cred *cred = current_cred();
+    struct file *file = (struct file *)REG_ARG0(regs);
+    char *path;
 
-    data = (struct probs_data *)ri->data;
     data->block = false;
-    printk(KERN_INFO "L3SM - PROBES - FILE OPEN TRIGGERED [pid=%d %s]\n", current->pid, current->comm);
-    if (1) // NEED TO BE MODIFIED WITH RULES_MANAGER
+    path = get_path(&file->f_path);
+    if (rule_check_access(cred->uid, cred->gid, current->pid, L3SM_RIGHT_OPEN, path))
     {
-        struct file *file = (struct file *)REG_ARG0(regs);
-        char * path;
-
-        path = get_path(&file->f_path);
         log_kern(current->pid, path);
         log_proc(current->pid, path);
-        kfree(path);
         data->block = true;
     }
+
+    kfree(path);
     return 0;
 }
 

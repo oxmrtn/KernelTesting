@@ -23,11 +23,6 @@ static ssize_t proc_write(struct file *file, const char __user *ubuf, size_t cou
     if (cmd.type == CMD_ADD)
     {
         add_rule_to_list(&cmd.rule);
-        // snprintf(rule_buffer, BUF_SIZE,
-        //          "PATH: %s\nRULE: %s\nUID: %s\nUSER: %s\nGID: %s\nPID: %s\nRIGHT: %s\nALIAS: %s\n",
-        //          cmd.rule.path, cmd.rule.rule, cmd.rule.uid, cmd.rule.user,
-        //          cmd.rule.gid, cmd.rule.pid, cmd.rule.right, cmd.rule.alias);
-        // printk(KERN_INFO "  %s", rule_buffer);
     }
     else if (cmd.type == CMD_SWITCH)
     {

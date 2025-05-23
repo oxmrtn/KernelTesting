@@ -7,16 +7,21 @@
 #include <linux/proc_fs.h>
 #include <linux/uaccess.h>
 #include <linux/slab.h>
-#include <linux/string.h> 
+#include <linux/string.h>
 #include <linux/dcache.h>
 #include <linux/path.h>
 #include <linux/fs.h>
-#include <linux/slab.h>
 #include <linux/seq_file.h>
 #include <linux/mm.h>
-
+#include <linux/uidgid.h>
 
 // -------------- DEFINE -------------
+
+#define L3SM_RIGHT_READ    MAY_READ
+#define L3SM_RIGHT_WRITE   MAY_WRITE
+#define L3SM_RIGHT_EXEC    MAY_EXEC
+#define L3SM_RIGHT_MOOV    0x10 
+#define L3SM_RIGHT_OPEN    0x08
 
 #define PROC_DIR_NAME "L3SM"
 #define PROC_FILE_NAME "rules"
@@ -56,6 +61,7 @@ struct rule_node
     rule_t rule;
     struct rule_node *next;
 }; 
+
 
 struct probs_data
 {
@@ -103,6 +109,12 @@ int log_proc(int pid, char *path);
 void free_logs(void);
 void add_log(const char *msg);
 
+
+// ---------- RULE MANAGER ---------
+bool rule_check_access(kuid_t uid, kgid_t gid, pid_t pid, int mask, const char *path);
+
 extern char rule_buffer[BUF_SIZE];
+extern struct rule_node *rule_list_head;
+
 
 #endif
