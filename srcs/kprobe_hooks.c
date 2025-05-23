@@ -158,7 +158,6 @@ static int hook_entry_file_open(struct kretprobe_instance *ri, struct pt_regs *r
         log_proc(current->pid, path);
         data->block = true;
     }
-
     kfree(path);
     return 0;
 }

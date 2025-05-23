@@ -55,7 +55,6 @@ bool rule_check_access(kuid_t uid, kgid_t gid, pid_t pid, int mask, const char *
         }
         curr = curr->next;
     }
-
     return (false);
 }
 
