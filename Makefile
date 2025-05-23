@@ -12,7 +12,7 @@ PWD := $(shell pwd)
 .PHONY: all clean fclean re
 
 all:
-	@$(MAKE) -C $(KDIR) M=$(PWD) EXTRA_CFLAGS="-I$(INC_DIR)" modules
+	@$(MAKE) -C $(KDIR) M=$(PWD) EXTRA_CFLAGS="-I$(INC_DIR) -fno-omit-frame-pointer" modules
 clean:
 	@$(MAKE) -C $(KDIR) M=$(PWD) clean
 
