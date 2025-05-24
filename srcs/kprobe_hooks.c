@@ -173,7 +173,7 @@ static int hook_exit_handler(struct kretprobe_instance *ri, struct pt_regs *regs
     if (data && data->block)
     {
         log_kern(current->pid, data->path);
-        log_chain(current->pid, data->path);
+        log_proc(current->pid, data->path);
         SET_RET(regs, -EACCES);
     }
     kfree(data->path);
