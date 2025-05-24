@@ -145,7 +145,6 @@ static int hook_entry_file_permissions(struct kretprobe_instance *ri, struct pt_
     {
         data->block = true;
     }
-    kfree(path);
     return 0;
 }
 
@@ -164,7 +163,6 @@ static int hook_entry_file_open(struct kretprobe_instance *ri, struct pt_regs *r
     {
         data->block = true;
     }
-    kfree(path);
     return 0;
 }
 
