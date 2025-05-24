@@ -75,6 +75,7 @@ int exit_probes(void)
 
 char *get_path(const struct path *path)
 // Tranform the path struct to a char *
+char *get_path(const struct path *path)
 {
     char *buf = kmalloc(PATH_MAX, GFP_KERNEL);
     char *path_str;
@@ -87,7 +88,9 @@ char *get_path(const struct path *path)
         kfree(buf);
         return NULL;
     }
-    return buf;
+    path_str = kstrdup(path_str, GFP_KERNEL);
+    kfree(buf);
+    return path_str;
 }
 
 static int hook_entry_inode_permissions(struct kretprobe_instance *ri, struct pt_regs *regs)
@@ -138,7 +141,7 @@ static int hook_entry_file_permissions(struct kretprobe_instance *ri, struct pt_
     data = (struct probs_data *)ri->data;
     data->block = false;
     path = get_path(&file->f_path);
-    data->path = kstrdup(path, GFP_KERNEL);
+    data->path = path;
     if (rule_check_access(cred->uid, cred->gid, current->pid, mask, path))
     {
         data->block = true;
@@ -157,7 +160,7 @@ static int hook_entry_file_open(struct kretprobe_instance *ri, struct pt_regs *r
 
     data->block = false;
     path = get_path(&file->f_path);
-    data->path = kstrdup(path, GFP_KERNEL);
+    data->path = path;
     if (rule_check_access(cred->uid, cred->gid, current->pid, L3SM_RIGHT_OPEN, path))
     {
         data->block = true;
@@ -176,6 +179,7 @@ static int hook_exit_handler(struct kretprobe_instance *ri, struct pt_regs *regs
         log_proc(current->pid, data->path);
         SET_RET(regs, -EACCES);
     }
-    kfree(data->path);
+    if (data->path)
+        kfree(data->path);
     return 0;
 }
