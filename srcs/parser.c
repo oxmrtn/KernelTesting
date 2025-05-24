@@ -20,6 +20,7 @@ char *extract_value(const char *input)
 }
 
 cmd_type_t get_cmd_type(const char *line)
+// Return the type of the unparsed command.
 {
     if (strncmp(line, "ADD", 3) == 0)
         return (CMD_ADD);
@@ -33,6 +34,7 @@ cmd_type_t get_cmd_type(const char *line)
 }
 
 void parse_arguments(parsed_cmd_t *cmd, const char *args)
+// Parse the args string and fill the parsed_cmd_t cmd with the extracted input
 {
     char *token, *p;
 
@@ -63,6 +65,7 @@ void parse_arguments(parsed_cmd_t *cmd, const char *args)
 }
 
 int empty_rules(const rule_t tocheck)
+//   Check if the rule have a sense ( if the rule has path, right, and at list something to identify the process)
 {
     if (!tocheck.path || !tocheck.right)
         return (1);
@@ -72,6 +75,7 @@ int empty_rules(const rule_t tocheck)
 }
 
 parsed_cmd_t parse_line(const char *line)
+//  Parse the whole line into a tokenized parsed_cmd_t, ansd 
 {
     char *args, *start, *end;
 
@@ -133,6 +137,7 @@ parsed_cmd_t parse_line(const char *line)
 }
 
 void free_cmd(parsed_cmd_t *cmd)
+// Free the allocated memory of a parsed_cmd_t struct
 {
     kfree(cmd->rule.path);
     kfree(cmd->rule.uid);

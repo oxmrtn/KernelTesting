@@ -10,6 +10,7 @@ char rule_buffer[BUF_SIZE];
 char log_buffer[BUF_SIZE];
 
 static ssize_t proc_write(struct file *file, const char __user *ubuf, size_t count, loff_t *ppos)
+// Called when a write attempt in /proc/L3SM/rules, tokenize ,parse and manage the command
 {
     char buf[BUF_SIZE];
     parsed_cmd_t cmd;
@@ -67,6 +68,7 @@ static ssize_t proc_write(struct file *file, const char __user *ubuf, size_t cou
 }
 
 static ssize_t proc_read(struct file *file, char __user *ubuf, size_t count, loff_t *ppos)
+// Called when read attempt in the /proc/L3SM/rules files
 {
     size_t len = strlen(rule_buffer);
 
@@ -79,6 +81,7 @@ static ssize_t proc_read(struct file *file, char __user *ubuf, size_t count, lof
 }
 
 static ssize_t log_read(struct file *file, char __user *ubuf, size_t count, loff_t *ppos)
+// Called when read attempt in the /proc/L3SM/logs files. Display the linked list of logs
 {
     struct log_chain *current_node = logs_list_head;
     char *buf;
@@ -105,17 +108,20 @@ static ssize_t log_read(struct file *file, char __user *ubuf, size_t count, loff
     return len;
 }
 
+// struct for /rules files
 static struct proc_ops proc_file_ops = 
 {
     .proc_write = proc_write,
     .proc_read = proc_read,
 };
 
+// struct for /logs files
 static struct proc_ops proc_logs_ops = 
 {
     .proc_read = log_read,
 };
 
+// Entry point of the module, create the /proc/L3SM files and folder
 static int __init rule_parser_init(void)
 {
     struct proc_dir_entry *dir;
@@ -148,6 +154,7 @@ static int __init rule_parser_init(void)
 }
 
 static void __exit rule_parser_exit(void)
+// Exit point of the module, free the linked lists and unload the 
 {
     free_rule_list();
     free_logs();

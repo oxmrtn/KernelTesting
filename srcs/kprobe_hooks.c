@@ -16,6 +16,8 @@ static const char *fileopen_hook_name        = "security_file_open";
 static const char *filepermissions_hook_name = "security_file_permission";
 static const char *inodepermissions_hook_name = "security_inode_permission";
 
+
+// Struct to do things
 static struct kretprobe fileopen_probe = {
     .handler        = hook_exit_handler,
     .entry_handler  = hook_entry_file_open,
@@ -48,8 +50,8 @@ static inline int set_kretprobe(struct kretprobe *kp, const char *name)
     return (0);
 }
 
-
 int init_probes(void)
+//  Init the Kretprobes
 {
     if (set_kretprobe(&fileopen_probe, fileopen_hook_name) < 0)
         return -1;
@@ -63,6 +65,7 @@ int init_probes(void)
 }
 
 int exit_probes(void)
+// Delete the kreprobes
 {
     unregister_kretprobe(&fileopen_probe);
     unregister_kretprobe(&filepermissions_probe);
@@ -71,6 +74,7 @@ int exit_probes(void)
 }
 
 char *get_path(const struct path *path)
+// Tranform the path struct to a char *
 {
     char *buf = kmalloc(PATH_MAX, GFP_KERNEL);
     char *path_str;
@@ -87,6 +91,7 @@ char *get_path(const struct path *path)
 }
 
 static int hook_entry_inode_permissions(struct kretprobe_instance *ri, struct pt_regs *regs)
+// Handler for the inode_permission hooks probed
 {
     struct probs_data *data = (struct probs_data *)ri->data;
     const struct cred *cred = current_cred();
@@ -108,11 +113,10 @@ static int hook_entry_inode_permissions(struct kretprobe_instance *ri, struct pt
     pathname = dentry_path_raw(dentry, buf, PATH_MAX);
     if (IS_ERR(pathname))
         pathname = NULL;
+    data->path = kstrdup(pathname);
     if (rule_check_access(cred->uid, cred->gid, current->pid, mask, pathname))
     {
         data->block = true;
-        log_kern(current->pid, pathname);
-        log_proc(current->pid, pathname);
     }
     done:
     if (dentry)
@@ -123,6 +127,7 @@ static int hook_entry_inode_permissions(struct kretprobe_instance *ri, struct pt
 
 
 static int hook_entry_file_permissions(struct kretprobe_instance *ri, struct pt_regs *regs)
+// Handler for the file_permission hooks probed
 {
     struct probs_data *data;
     const struct cred *cred = current_cred();
@@ -133,17 +138,17 @@ static int hook_entry_file_permissions(struct kretprobe_instance *ri, struct pt_
     data = (struct probs_data *)ri->data;
     data->block = false;
     path = get_path(&file->f_path);
+    data->path = kstrdup(path);
     if (rule_check_access(cred->uid, cred->gid, current->pid, mask, path))
     {
         data->block = true;
-        log_kern(current->pid, path);
-        log_proc(current->pid, path);
     }
     kfree(path);
     return 0;
 }
 
 static int hook_entry_file_open(struct kretprobe_instance *ri, struct pt_regs *regs)
+// Handler for the file_open hooks probed
 {
     struct probs_data *data = (struct probs_data *)ri->data;
     const struct cred *cred = current_cred();
@@ -152,10 +157,9 @@ static int hook_entry_file_open(struct kretprobe_instance *ri, struct pt_regs *r
 
     data->block = false;
     path = get_path(&file->f_path);
+    data->path = kstrdup(path);
     if (rule_check_access(cred->uid, cred->gid, current->pid, L3SM_RIGHT_OPEN, path))
     {
-        log_kern(current->pid, path);
-        log_proc(current->pid, path);
         data->block = true;
     }
     kfree(path);
@@ -167,6 +171,11 @@ static int hook_exit_handler(struct kretprobe_instance *ri, struct pt_regs *regs
     struct probs_data *data = (struct probs_data *)ri->data;
 
     if (data && data->block)
+    {
+        log_kern(current->pid, data->path);
+        log_chain(current->pid, data->path);
         SET_RET(regs, -EACCES);
+    }
+    kfree(data->path);
     return 0;
 }

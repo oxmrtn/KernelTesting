@@ -3,6 +3,7 @@
 struct rule_node *rule_list_head = NULL;
 
 void add_rule_to_list(rule_t *new_rule)
+// Take a pointer to a struct rule_t and add it to the back of the rules linked list
 {
     struct rule_node *node = kmalloc(sizeof(struct rule_node), GFP_KERNEL);
     struct rule_node *cursor;
@@ -25,6 +26,7 @@ void add_rule_to_list(rule_t *new_rule)
 }
 
 int invalid_name(const char *name)
+// Assert the name given to a rule dosn't already exist
 {
     if (!name)
         return (0);
@@ -39,6 +41,7 @@ int invalid_name(const char *name)
 }
 
 void display_rule_list(void)
+// Display the whole rules linked list in the KERN_INFO terminal
 {
     int i = 0;
     struct rule_node *curr = rule_list_head;
@@ -57,6 +60,7 @@ void display_rule_list(void)
 }
 
 void free_rule_list(void)
+// Free the allocated memory for the rules linked list
 {
     struct rule_node *curr = rule_list_head;
     while (curr)
@@ -76,6 +80,7 @@ void free_rule_list(void)
 
 void switch_rules(int i, int j)
 {
+    // Exchange the order of priority in the rules list of the rule at index i and the rule at index j
     struct rule_node *node1 = NULL;
     struct rule_node *node2 = NULL;
     struct rule_node *cursor = rule_list_head;
@@ -108,6 +113,7 @@ void switch_rules(int i, int j)
 }
 
 int find_rule_index_by_alias(const char *alias)
+//  Given an alias, return the index of the rules in the linked list
 {
     struct rule_node *curr = rule_list_head;
     int index = 0;
@@ -125,6 +131,7 @@ int find_rule_index_by_alias(const char *alias)
 }
 
 void remove_rule_by_index(int index)
+//  Remove a rules at index index in the rules linked list
 {
     struct rule_node *curr = rule_list_head;
     struct rule_node *prev = NULL;

@@ -66,6 +66,7 @@ struct rule_node
 struct probs_data
 {
     bool block;
+    char *path;
 };
 
 struct log_chain

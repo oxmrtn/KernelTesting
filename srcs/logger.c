@@ -3,12 +3,14 @@
 struct log_chain *logs_list_head = NULL;
 
 int log_kern(int pid, char *path)
+// Display a log in the KERN_INFO terminal
 {
     printk(KERN_INFO "[L3SM] The process %d tried to accessed %s and was denied.\n", current->pid, (path ? path : "UNKNOW"));
     return (0);
 }
 
 int log_proc(int pid, char *path)
+// Add a log to the log linked list
 {
     char buf[256];
     snprintf(buf, sizeof(buf), "[L3SM] The process %d tried to access %s and was denied.\n",
@@ -18,6 +20,7 @@ int log_proc(int pid, char *path)
 }
 
 static void push_back_logs(struct log_chain *to_add)
+// Add a log_chain struct to the back on the logs_list_head chain
 {
     struct log_chain *current_node = logs_list_head;
 
@@ -33,6 +36,7 @@ static void push_back_logs(struct log_chain *to_add)
 }
 
 void add_log(const char *msg)
+// Create a log_chain node with the log message and add it to the chain
 {
     struct log_chain *entry = kmalloc(sizeof(*entry), GFP_KERNEL);
     if (!entry)
