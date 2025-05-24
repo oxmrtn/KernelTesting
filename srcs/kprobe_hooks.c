@@ -73,7 +73,6 @@ int exit_probes(void)
     return 0;
 }
 
-char *get_path(const struct path *path)
 // Tranform the path struct to a char *
 char *get_path(const struct path *path)
 {
