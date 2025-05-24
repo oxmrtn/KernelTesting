@@ -113,7 +113,7 @@ static int hook_entry_inode_permissions(struct kretprobe_instance *ri, struct pt
     pathname = dentry_path_raw(dentry, buf, PATH_MAX);
     if (IS_ERR(pathname))
         pathname = NULL;
-    data->path = kstrdup(pathname);
+    data->path = kstrdup(pathname, GFP_KERNEL);
     if (rule_check_access(cred->uid, cred->gid, current->pid, mask, pathname))
     {
         data->block = true;
@@ -138,7 +138,7 @@ static int hook_entry_file_permissions(struct kretprobe_instance *ri, struct pt_
     data = (struct probs_data *)ri->data;
     data->block = false;
     path = get_path(&file->f_path);
-    data->path = kstrdup(path);
+    data->path = kstrdup(path, GFP_KERNEL);
     if (rule_check_access(cred->uid, cred->gid, current->pid, mask, path))
     {
         data->block = true;
@@ -157,7 +157,7 @@ static int hook_entry_file_open(struct kretprobe_instance *ri, struct pt_regs *r
 
     data->block = false;
     path = get_path(&file->f_path);
-    data->path = kstrdup(path);
+    data->path = kstrdup(path, GFP_KERNEL);
     if (rule_check_access(cred->uid, cred->gid, current->pid, L3SM_RIGHT_OPEN, path))
     {
         data->block = true;
