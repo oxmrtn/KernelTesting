@@ -159,28 +159,28 @@ static int hook_entry_file_permissions(struct kretprobe_instance *ri, struct pt_
     return 0;
 }
 
-static int hook_entry_file_open(struct kretprobe_instance *ri, struct pt_regs *regs)
-// Handler for the file_open hooks probed
-{
-    if (this_cpu_read(l3sm_in_hook))
-        return 0;
-    this_cpu_write(l3sm_in_hook, 1);
+// static int hook_entry_file_open(struct kretprobe_instance *ri, struct pt_regs *regs)
+// // Handler for the file_open hooks probed
+// {
+//     if (this_cpu_read(l3sm_in_hook))
+//         return 0;
+//     this_cpu_write(l3sm_in_hook, 1);
 
-    struct probs_data *data = (struct probs_data *)ri->data;
-    const struct cred *cred = current_cred();
-    struct file *file = (struct file *)REG_ARG0(regs);
-    char *path;
+//     struct probs_data *data = (struct probs_data *)ri->data;
+//     const struct cred *cred = current_cred();
+//     struct file *file = (struct file *)REG_ARG0(regs);
+//     char *path;
 
-    data->block = false;
-    path = get_path(&file->f_path);
-    data->path = path;
-    if (rule_check_access(cred->uid, cred->gid, current->pid, L3SM_RIGHT_OPEN, path))
-    {
-        data->block = true;
-    }
-    this_cpu_write(l3sm_in_hook, 0);
-    return 0;
-}
+//     data->block = false;
+//     path = get_path(&file->f_path);
+//     data->path = path;
+//     if (rule_check_access(cred->uid, cred->gid, current->pid, L3SM_RIGHT_OPEN, path))
+//     {
+//         data->block = true;
+//     }
+//     this_cpu_write(l3sm_in_hook, 0);
+//     return 0;
+// }
 
 static int hook_exit_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
