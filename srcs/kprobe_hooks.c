@@ -17,6 +17,8 @@ static const char *filepermissions_hook_name = "security_file_permission";
 static const char *inodepermissions_hook_name = "security_inode_permission";
 
 
+DEFINE_PER_CPU(int, l3sm_in_hook);
+
 // Struct to do things
 static struct kretprobe fileopen_probe = {
     .handler        = hook_exit_handler,
@@ -95,6 +97,10 @@ char *get_path(const struct path *path)
 static int hook_entry_inode_permissions(struct kretprobe_instance *ri, struct pt_regs *regs)
 // Handler for the inode_permission hooks probed
 {
+    if (this_cpu_read(l3sm_in_hook))
+        return 0;
+    this_cpu_write(l3sm_in_hook, 1);
+
     struct probs_data *data = (struct probs_data *)ri->data;
     const struct cred *cred = current_cred();
     data->block = false;
@@ -124,6 +130,7 @@ static int hook_entry_inode_permissions(struct kretprobe_instance *ri, struct pt
     if (dentry)
         dput(dentry);
     kfree(buf);
+    this_cpu_write(l3sm_in_hook, 0);
     return 0;
 }
 
@@ -131,6 +138,9 @@ static int hook_entry_inode_permissions(struct kretprobe_instance *ri, struct pt
 static int hook_entry_file_permissions(struct kretprobe_instance *ri, struct pt_regs *regs)
 // Handler for the file_permission hooks probed
 {
+    if (this_cpu_read(l3sm_in_hook))
+        return 0;
+    this_cpu_write(l3sm_in_hook, 1);
     struct probs_data *data;
     const struct cred *cred = current_cred();
     int mask = (int)REG_ARG2(regs);
@@ -145,12 +155,17 @@ static int hook_entry_file_permissions(struct kretprobe_instance *ri, struct pt_
     {
         data->block = true;
     }
+    this_cpu_write(l3sm_in_hook, 0);
     return 0;
 }
 
 static int hook_entry_file_open(struct kretprobe_instance *ri, struct pt_regs *regs)
 // Handler for the file_open hooks probed
 {
+    if (this_cpu_read(l3sm_in_hook))
+        return 0;
+    this_cpu_write(l3sm_in_hook, 1);
+
     struct probs_data *data = (struct probs_data *)ri->data;
     const struct cred *cred = current_cred();
     struct file *file = (struct file *)REG_ARG0(regs);
@@ -163,6 +178,7 @@ static int hook_entry_file_open(struct kretprobe_instance *ri, struct pt_regs *r
     {
         data->block = true;
     }
+    this_cpu_write(l3sm_in_hook, 0);
     return 0;
 }
 
