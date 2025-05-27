@@ -32,6 +32,7 @@ int log_proc(int pid, char *path)
                 tm.tm_mday,
                 tm.tm_hour,
                 tm.tm_min,
+                tm.tm_sec,
                 pid, path ? path : "UNKNOWN");
     add_log(buf);
     return (0);
