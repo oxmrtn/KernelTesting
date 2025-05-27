@@ -150,6 +150,7 @@ static int __init rule_parser_init(void)
         printk(KERN_ERR "error: Probes cannot be created\n");
     }
     printk(KERN_INFO "Rule Parser module loaded, /proc/L3SM/rule and /proc/L3SM/logs created.\n");
+    log_proc(22, "PATH DE DINGUE");
     return (0);
 }
 
