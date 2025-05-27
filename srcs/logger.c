@@ -14,7 +14,7 @@ int log_proc(int pid, char *path)
 {
     char buf[256];
     snprintf(buf, sizeof(buf), "[L3SM] The process %d tried to access %s and was denied.\n",
-         current->pid, path ? path : "UNKNOWN");
+         pid, path ? path : "UNKNOWN");
     add_log(buf);
     return (0);
 }
