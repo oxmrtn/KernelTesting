@@ -5,16 +5,34 @@ struct log_chain *logs_list_head = NULL;
 int log_kern(int pid, char *path)
 // Display a log in the KERN_INFO terminal
 {
-    printk(KERN_INFO "[L3SM] The process %d tried to accessed %s and was denied.\n", current->pid, (path ? path : "UNKNOW"));
+    struct timespec64 ts;
+    struct tm tm;
+    ktime_get_real_ts64(&ts);
+    time64_to_tm(ts.tv_sec, 0, &tm);
+    printk(KERN_INFO "[L3SM] %04ld:%02d:%02d:%02d:%02d:%02d The process %d tried to accessed %s and was denied.\n", tm.tm_year + 1900,
+                tm.tm_mon + 1,
+                tm.tm_mday,
+                tm.tm_hour,
+                tm.tm_min,
+                tm.tm_sec, pid, (path ? path : "UNKNOW"));
     return (0);
 }
 
 int log_proc(int pid, char *path)
 // Add a log to the log linked list
 {
+    struct timespec64 ts;
+    struct tm tm;
+    ktime_get_real_ts64(&ts);
+    time64_to_tm(ts.tv_sec, 0, &tm);
     char buf[256];
-    snprintf(buf, sizeof(buf), "[L3SM] The process %d tried to access %s and was denied.\n",
-         pid, path ? path : "UNKNOWN");
+    snprintf(buf, sizeof(buf), "[L3SM] %04ld:%02d:%02d:%02d:%02d:%02d The process %d tried to access %s and was denied.\n",
+                tm.tm_year + 1900,
+                tm.tm_mon + 1,
+                tm.tm_mday,
+                tm.tm_hour,
+                tm.tm_min,
+                pid, path ? path : "UNKNOWN");
     add_log(buf);
     return (0);
 }

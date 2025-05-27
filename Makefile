@@ -3,7 +3,7 @@ MAKEFLAGS += --no-print-directory
 obj-m := L3SM.o
 SRC_DIR := srcs
 INC_DIR := includes
-L3SM-y := srcs/L3SM.o srcs/parser.o srcs/rule_list.o  srcs/kprobe_hooks.o srcs/logger.o srcs/rules_manager.o
+L3SM-y := srcs/L3SM.o srcs/parser.o srcs/rule_list.o  srcs/logger.o srcs/rules_manager.o
 
 
 KDIR := /lib/modules/$(shell uname -r)/build

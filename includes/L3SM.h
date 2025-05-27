@@ -14,6 +14,8 @@
 #include <linux/seq_file.h>
 #include <linux/mm.h>
 #include <linux/uidgid.h>
+#include <linux/timekeeping.h>
+#include <linux/time64.h>
 
 // -------------- DEFINE -------------
 

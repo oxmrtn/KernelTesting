@@ -145,10 +145,22 @@ static int __init rule_parser_init(void)
         printk(KERN_ERR "Failed to create /proc/L3SM/logs file\n");
         return (-ENOMEM);
     }
-    if (init_probes() == -1)
-    {
-        printk(KERN_ERR "error: Probes cannot be created\n");
-    }
+    // if (init_probes() == -1)
+    // {
+    //     printk(KERN_ERR "error: Probes cannot be created\n");
+    // }
+    log_kern(0, "/test");
+    log_kern(0, "/testfolder");
+    log_kern(0, "/testfolder/testfile");
+    log_kern(0, "/testfolder/fileexec");
+    log_kern(0, "/testfolder/fileread");
+    log_kern(0, "/testfolder/fileopen");
+    log_proc(0, "/test");
+    log_proc(0, "/testfolder");
+    log_proc(0, "/testfolder/testfile");
+    log_proc(0, "/testfolder/fileexec");
+    log_proc(0, "/testfolder/fileread");
+    log_proc(0, "/testfolder/fileopen");
     printk(KERN_INFO "Rule Parser module loaded, /proc/L3SM/rule and /proc/L3SM/logs created.\n");
     return (0);
 }
